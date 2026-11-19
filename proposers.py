@@ -52,7 +52,8 @@ def llm_proposer(brief, code, history, step):
     req = urllib.request.Request(
         f"{base}/chat/completions", data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json",
-                 "Authorization": f"Bearer {os.environ['LLM_API_KEY']}"})
+                 "Authorization": f"Bearer {os.environ['LLM_API_KEY']}",
+                 "User-Agent": "physics-guarded-agent/0.1"})
     with urllib.request.urlopen(req, timeout=120) as resp:
         reply = json.load(resp)["choices"][0]["message"]["content"]
     return parse_reply(reply)
