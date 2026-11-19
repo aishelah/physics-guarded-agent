@@ -88,11 +88,34 @@ export LLM_MODEL=...          # optional
 python agent.py --task heat_exchanger --iters 30
 ```
 
-The LLM proposer has not yet been run against a live API.
+### First LLM run (19 Nov 2026)
+
+5 iterations on `heat_exchanger`, model `openai/gpt-oss-120b` via Groq's free
+tier (OpenAI-compatible endpoint), temperature 0.7. Windows, Python 3.14.
+Full report: `results/2026-11-19_heat_exchanger_gpt-oss-120b_5iters.md`.
+
+| id | status | CV rel. RMSE | Extrap. rel. RMSE | Proposal |
+|---|---|---|---|---|
+| 000 | baseline_fail | 5.92% | 10.51% | starting black-box model |
+| 001 | kept | 3.05% | 0.0% | replace the MLP with the epsilon-NTU counterflow relation |
+| 002 | discarded | 3.05% | 0.0% | add a UA-only correction factor |
+| 003 | discarded | 3.07% | 0.27% | add a linear correction term in UA |
+| 004-005 | proposal_failed | | | HTTP 429 (free-tier rate limit) |
+
+- In its first proposal the agent replaced the black box with the textbook
+  epsilon-NTU relation, reaching the 3% noise floor and passing all physics checks.
+- Because the simulator uses that same relation, this shows the agent **recalls
+  textbook physics**; it is not evidence of discovering structure from data.
+  Making the benchmarks test discovery rather than recall is an open design question.
+- Two iterations hit the provider's rate limit; the loop logged them and continued.
+- Baseline physics numbers differ slightly from the table above (second law 6.0%
+  vs 5.7%) because library versions are not pinned.
+
+On Windows PowerShell, set variables with `$env:LLM_API_KEY = "..."` and also set
+`$env:PYTHONUTF8 = "1"`.
 
 ## Next
 
-- [ ] First LLM-driven run on each task (30-50 experiments) and a written analysis
 - [ ] Ablation: the same agent with the physics check off, compared on extrapolation
 - [ ] Track whether kept models extrapolate better or worse than the baseline
 - [ ] More systems: fin heat transfer, beam deflection, fatigue life (S-N curve)
